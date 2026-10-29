@@ -1,0 +1,31 @@
+name: freelance-worker
+on:
+  workflow_dispatch:
+    inputs:
+      job_text:
+        description: "Job ka poora text paste karo"
+        required: true
+      job_url:
+        description: "Client/job ka link"
+        required: false
+jobs:
+  work:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install requests pytest
+      - run: python worker.py
+        env:
+          JOB_TEXT: ${{ inputs.job_text }}
+          JOB_URL: ${{ inputs.job_url }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kaam
+          path: out/
